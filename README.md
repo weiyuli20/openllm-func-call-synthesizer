@@ -201,3 +201,36 @@ MIT License. See [LICENSE](LICENSE) for details.
 🌟 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=diqiuzhuanzhuan/openllm-func-call-synthesizer&type=Date)](https://www.star-history.com/#diqiuzhuanzhuan/openllm-func-call-synthesizer&Date)
+
+
+'''
+仅生成问题
+python -m apps.main ^
+  synthesizer.query_generation.enable=true ^
+  synthesizer.conversation_generation.enable=false ^
+  synthesizer.tool_calling_conversation_generation.enable=false ^
+  synthesizer.function_call_generation.enable=false ^
+  synthesizer.critic.enable=false ^
+  synthesizer.llama_factory.enable=false ^
+  synthesizer.verl.enable=false
+
+仅生成function_call
+python -m apps.main ^
+  synthesizer.query_generation.enable=fasle ^
+  synthesizer.conversation_generation.enable=false ^
+  synthesizer.tool_calling_conversation_generation.enable=false ^
+  synthesizer.function_call_generation.enable=true ^
+  synthesizer.critic.enable=false ^
+  synthesizer.llama_factory.enable=false ^
+  synthesizer.verl.enable=false
+
+进行critic
+python -m apps.main ^
+  synthesizer.query_generation.enable=fasle ^
+  synthesizer.conversation_generation.enable=false ^
+  synthesizer.tool_calling_conversation_generation.enable=false ^
+  synthesizer.function_call_generation.enable=false ^
+  synthesizer.critic.enable=true ^
+  synthesizer.llama_factory.enable=false ^
+  synthesizer.verl.enable=false
+'''

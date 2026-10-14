@@ -12,10 +12,7 @@ query_generation:
   function_docs: examples/function_docs.json
 
   languages:
-    - English
     - Chinese
-    - Japanese
-    - German
 
   name: "tool_query"
   output_dir: "data"
@@ -76,7 +73,7 @@ function_call_generation:
       stream: False
 
 
-conversation_generation:
+tool_calling_conversation_generation:
   enable: False
   query_dataset: "data/tool_query"  # dataset produced by query_generation
   max_num: -1  # -1 means all queries

@@ -12,26 +12,33 @@ query_generation:
   function_docs: examples/function_docs.json
 
   languages:
-    - English
     - Chinese
-    - Japanese
-    - German
 
   name: "tool_query"
   output_dir: "data"
   output_format: "jsonl"   # or "json", "csv", "parquet"
 
   providers:
-    openai:
+    qwen:
       backend: "openai"
       models:
-        - "gpt-4o"
-        - "gpt-4o-mini"
-        - "gpt-4.1"
-        - "gpt-5-mini"
+        - "qwen-plus"
       backend_params:
-        max_tokens_per_minute: 1_000_000
+        api_key: "sk-ws-H.PEDLPMH.ZN6k.MEUCIDOtXbGPYKTHPSBD0tTRIvk-CX7Jz4K6prvqM3_8uqg9AiEAy2HF9Wk41uF2Rma47ih7A5AI-t6sUJKD846SyFj4z0I"
+        base_url: "https://llm-mvatcq7dlr50w886.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+        max_tokens_per_minute: 1000000
         require_all_responses: False
+
+    # openai:
+    #   backend: "openai"
+    #   models:
+    #     - "gpt-4o"
+    #     - "gpt-4o-mini"
+    #     - "gpt-4.1"
+    #     - "gpt-5-mini"
+    #   backend_params:
+    #     max_tokens_per_minute: 1_000_000
+    #     require_all_responses: False
 
   # anthropic:
   #    backend: "litellm"
@@ -49,14 +56,14 @@ query_generation:
     #     max_tokens_per_minute: 1_000_000
     #     require_all_responses: False
 
-    google:
-      backend: "openai"
-      models:
-        - "gemini-2.5-pro-nothinking"
-        - "gemini-2.5-flash-thinking"
-      backend_params:
-        max_tokens_per_minute: 1_000_000
-        require_all_responses: False
+    # google:
+    #   backend: "openai"
+    #   models:
+    #     - "gemini-2.5-pro-nothinking"
+    #     - "gemini-2.5-flash-thinking"
+    #   backend_params:
+    #     max_tokens_per_minute: 1_000_000
+    #     require_all_responses: False
 
 conversation_generation:
   enable: False
@@ -89,15 +96,17 @@ function_call_generation:
   output_format: "jsonl"   # or "json", "csv", "parquet"
   name: "function_call_gpt_4o"
   provider:
-    model_name: "gpt-4o"
+    model_name: "qwen-plus"
     backend: "openai"
     backend_params:
+      api_key: ${synthesizer.query_generation.providers.qwen.backend_params.api_key}
+      base_url: "https://llm-mvatcq7dlr50w886.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
       require_all_responses: False
-      max_tokens_per_minute: 8_000_000
+      max_tokens_per_minute: 1_000_000
     generation_params:
       max_tokens: 4096
 
-conversation_generation:
+tool_calling_conversation_generation:
   enable: False
   query_dataset: "data/tool_query"  # dataset produced by query_generation
   max_num: -1  # -1 means all queries
@@ -129,11 +138,11 @@ critic:
     throttle_value: 0
   name: "function_call_gpt_4o_critiqued_by_deepeval"
   provider:
-    model_name: "gpt-5-mini-2025-08-07"
+    model_name: "openai/qwen3.8-max"
     backend: "openai"
     backend_params:
-      require_all_responses: False
-      max_tokens_per_minute: 3_000_000
+      api_key: ${synthesizer.query_generation.providers.qwen.backend_params.api_key}
+      api_base: "https://llm-mvatcq7dlr50w886.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
 
 
 llama_factory:

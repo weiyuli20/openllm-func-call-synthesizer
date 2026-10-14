@@ -21,9 +21,28 @@
 # SOFTWARE.
 
 import json
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
+from types import ModuleType
 from typing import Any, Protocol, cast
+
+
+def _install_windows_resource_compatibility() -> None:
+    if sys.platform != "win32":
+        return
+
+    try:
+        __import__("resource")
+    except ModuleNotFoundError:
+        resource_module = ModuleType("resource")
+        setattr(resource_module, "RLIMIT_NOFILE", 7)
+        setattr(resource_module, "getrlimit", lambda _resource: (sys.maxsize, sys.maxsize))
+        setattr(resource_module, "setrlimit", lambda _resource, _limits: None)
+        sys.modules["resource"] = resource_module
+
+
+_install_windows_resource_compatibility()
 
 from bespokelabs import curator
 from bespokelabs.curator.log import logger

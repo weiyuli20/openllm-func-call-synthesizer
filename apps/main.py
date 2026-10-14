@@ -641,7 +641,7 @@ def generate_tool_calling_conversation_dataset(cfg: DictConfig, mcp_tools: list[
     ToolCallingLoop run.  The full turn list (system / user / assistant tool_calls /
     tool results / final assistant answer) is serialised to JSON and saved.
     """
-    conversation_cfg = cfg.synthesizer.conversation_generation
+    conversation_cfg = cfg.synthesizer.tool_calling_conversation_generation
 
     query_dataset_path = Path(conversation_cfg.query_dataset)
     if not query_dataset_path.exists():
@@ -701,6 +701,8 @@ def main(cfg: DictConfig):
         generate_query_dataset(cfg, function_docs=openai_format_tools)
     if cfg.synthesizer.conversation_generation.enable:
         generate_conversation_dataset(cfg)
+    if cfg.synthesizer.tool_calling_conversation_generation.enable:
+        generate_tool_calling_conversation_dataset(cfg, mcp_tools=mcp_tools)
     if cfg.synthesizer.function_call_generation.enable:
         generate_function_call_dataset(cfg, mcp_tools=mcp_tools)
     if cfg.synthesizer.critic.enable:

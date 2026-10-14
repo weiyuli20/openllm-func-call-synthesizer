@@ -74,7 +74,7 @@ def persist_dataset_if_changed(dataset: Dataset, output_dir: Path, filename: str
         logger.info("Dataset at %s unchanged; skipping serialization.", output_dir)
         return
 
-    dataset.to_json(str(output_dir / f"{filename}.jsonl"), orient="records", lines=True)
+    dataset.to_json(str(output_dir / f"{filename}.jsonl"), orient="records", lines=True, force_ascii=False)
     dataset.to_csv(str(output_dir / f"{filename}.csv"))
     dataset.to_parquet(str(output_dir / f"{filename}.parquet"))
     fingerprint_file.write_text(fingerprint)
