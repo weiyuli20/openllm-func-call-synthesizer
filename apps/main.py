@@ -591,17 +591,28 @@ async def _run_single_conversation(
     tools_schema: list[dict[str, Any]],
     mcp_cfg: Mapping[str, Any],
     model_name: str,
+    backend: str,
+    backend_params: Mapping[str, Any],
+    generation_params: Mapping[str, Any],
     system_prompt: str,
     max_iterations: int,
 ) -> dict:
     """Run one agentic conversation and return query + full turn list."""
 
     def llm_callable(messages: list[dict[str, Any]]) -> dict[str, Any]:
+        litellm_model = model_name if "/" in model_name else f"{backend}/{model_name}"
+        completion_params = dict(generation_params)
+        if backend_params.get("api_key"):
+            completion_params["api_key"] = backend_params["api_key"]
+        api_base = backend_params.get("api_base", backend_params.get("base_url"))
+        if api_base:
+            completion_params["api_base"] = api_base
         response = litellm.completion(
-            model=model_name,
+            model=litellm_model,
             messages=messages,
             tools=tools_schema,
             tool_choice="auto",
+            **completion_params,
         )
         return response.choices[0].message.model_dump()
 
@@ -624,12 +635,18 @@ async def _generate_conversations_async(
     tools_schema: list[dict],
     mcp_cfg: dict,
     model_name: str,
+    backend: str,
+    backend_params: Mapping[str, Any],
+    generation_params: Mapping[str, Any],
     system_prompt: str,
     max_iterations: int,
 ) -> list[dict]:
     results = []
     for query in queries:
-        result = await _run_single_conversation(query, tools_schema, mcp_cfg, model_name, system_prompt, max_iterations)
+        result = await _run_single_conversation(
+            query, tools_schema, mcp_cfg, model_name, backend, backend_params,
+            generation_params, system_prompt, max_iterations
+        )
         results.append(result)
     return results
 
@@ -668,6 +685,15 @@ def generate_tool_calling_conversation_dataset(cfg: DictConfig, mcp_tools: list[
             tools_schema=tools_schema,
             mcp_cfg=mcp_cfg,
             model_name=conversation_cfg.provider.model_name,
+            backend=conversation_cfg.provider.get("backend", "openai"),
+            backend_params=_to_dict_config_section(
+                conversation_cfg.provider.get("backend_params", {}),
+                name="tool_calling_conversation_generation.provider.backend_params",
+            ),
+            generation_params=_to_dict_config_section(
+                conversation_cfg.provider.get("generation_params", {}),
+                name="tool_calling_conversation_generation.provider.generation_params",
+            ),
             system_prompt=conversation_cfg.get(
                 "system_prompt",
                 "You are a helpful assistant. Always use the available tools to answer the user's request.",

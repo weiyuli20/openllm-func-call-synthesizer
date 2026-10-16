@@ -2,8 +2,12 @@
 name: "default_synthesizer"
 
 mcp_servers:
+  # "ugreen_mcp":
+  #   transport: "http://localhost:8000/mcp"
+
   "ugreen_mcp":
-    transport: "http://localhost:8000/mcp"
+    transport: "http://localhost:20038/sse"
+
 
 choose_part_tools: false # ["search_photos", "create_album"]
 
@@ -112,11 +116,24 @@ tool_calling_conversation_generation:
   max_num: -1  # -1 means all queries
   max_iterations: 8  # max LLM calls per conversation before stopping
   system_prompt: >
-    You are a helpful assistant.
+    You are an assistant that completes requests using the available tools.
+    Make only the minimum reasoning needed to choose the next tool and its arguments.
+    Do not reveal or narrate your reasoning. Call tools directly and use their results
+    to decide whether another tool call is needed. After all required tool calls are
+    complete, give the user a concise, accurate answer based only on the tool results.
+    Do not invent details that the tools did not return.
   output_dir: "data"
   name: "conversation_gpt_4o_mini"
   provider:
-    model_name: "gpt-4o-mini"
+    model_name: "qwen3.6-flash"
+    backend: "openai"
+    backend_params:
+      api_key: ${synthesizer.query_generation.providers.qwen.backend_params.api_key}
+      base_url: "https://llm-mvatcq7dlr50w886.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+      require_all_responses: False
+      max_tokens_per_minute: 1_000_000
+    generation_params:
+      max_tokens: 4096
 
 critic:
   enable: True
@@ -143,6 +160,7 @@ critic:
     backend_params:
       api_key: ${synthesizer.query_generation.providers.qwen.backend_params.api_key}
       api_base: "https://llm-mvatcq7dlr50w886.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+      
 
 
 llama_factory:
